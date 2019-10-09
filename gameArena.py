@@ -12,19 +12,30 @@ class ChessArena:
         ]
 
     def moveUnit(self, x1, y1, x2, y2):
+        removedUnitID=-1
         for i in self.UnitList:
             if i.x==x2 and i.y==y2:
-                del i
+                removedUnitID=self.UnitList.index(i)
                 break
+        if removedUnitID>-1:
+            del self.UnitList[removedUnitID]
+
         for i in self.UnitList:
             if i.x==x1 and i.y==y1:
                 i.x=x2
                 i.y=y2
                 i.isMoved=1
+                if i.owner==1:
+                    bottom=7
+                else:
+                    bottom=0
+                if i.UnitID=='P' and i.y==bottom:
+                    self.promotion(self.UnitList.index(i))
                 break
-
+        
     def promotion(self, UnitID):
-        pass
+        self.UnitList.append(QueenUnit(self.UnitList[UnitID].x,self.UnitList[UnitID].y,self.UnitList[UnitID].owner))
+        del self.UnitList[UnitID]
 
     def castling(self, KingID, RookID):
         pass
@@ -98,7 +109,7 @@ class QueenUnit(Unit):
                 if gridInfo[y][i][0]!=str(self.owner):
                     acPosition.append([i,y])
                 break
-        for i in range(0,x):
+        for i in reversed(range(0,x)):
             if gridInfo[y][i]=="00":
                 acPosition.append([i,y])
             else:
@@ -112,7 +123,7 @@ class QueenUnit(Unit):
                 if gridInfo[i][x][0]!=str(self.owner):
                     acPosition.append([x,i])
                 break
-        for i in range(0,y):
+        for i in reversed(range(0,y)):
             if gridInfo[i][x]=="00":
                 acPosition.append([x,i])
             else:
@@ -233,7 +244,7 @@ class RookUnit(Unit):
                 if gridInfo[y][i][0]!=str(self.owner):
                     acPosition.append([i,y])
                 break
-        for i in range(0,x):
+        for i in reversed(range(0,x)):
             if gridInfo[y][i]=="00":
                 acPosition.append([i,y])
             else:
@@ -247,7 +258,7 @@ class RookUnit(Unit):
                 if gridInfo[i][x][0]!=str(self.owner):
                     acPosition.append([x,i])
                 break
-        for i in range(0,y):
+        for i in reversed(range(0,y)):
             if gridInfo[i][x]=="00":
                 acPosition.append([x,i])
             else:
@@ -286,9 +297,10 @@ class PawnUnit(Unit):
 def main():
     game1=ChessArena()
     game1.printGrid()
-    game1.moveUnit(0,1,0,2)
+    game1.moveUnit(0,1,0,7)
     game1.printGrid()
     for i in game1.UnitList:
+        print(str(i.owner)+i.UnitID)
         print(i.getMove(game1.getGridInfo()))
 
 if '__main__' == __name__:

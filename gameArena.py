@@ -61,10 +61,6 @@ class ChessArena:
         self.UnitList.clear()
         self.UnitList=copy.deepcopy(self.UnitList_backup)
         self.canBack=False
-        
-    def promotion(self, UnitID):
-        self.UnitList.append(QueenUnit(self.UnitList[UnitID].x,self.UnitList[UnitID].y,self.UnitList[UnitID].owner))
-        del self.UnitList[UnitID]
 
     def getGridInfo(self):
         Grid=[[],[],[],[],[],[],[],[]]
@@ -86,23 +82,9 @@ class ChessArena:
             GridStr+="\n"
         print(GridStr)
 
-    def isCheckMate(self, player):
-        for i in self.UnitList:
-            if i.UnitID=='K' and i.owner==player:
-                kingMove=i.getMove(self.getGridInfo)
-                break
-        flagGrid=[[],[],[],[],[],[],[],[]]
-        for i in range(8):
-            for j in range(8):
-                flagGrid[i].append(True)
-        for i in self.UnitList:
-            if i.owner!=player:
-                for j in i.getMove(self.getGridInfo):
-                    flagGrid[j[1]][[j[0]]]=False
-        for i in kingMove:
-            if flagGrid[i[1]][i[0]]==True:
-                return False
-        return True
+    def promotion(self, UnitID):
+        self.UnitList.append(QueenUnit(self.UnitList[UnitID].x,self.UnitList[UnitID].y,self.UnitList[UnitID].owner))
+        del self.UnitList[UnitID]
 
     def isAttacked(self, x, y, player):
         for i in self.UnitList:
@@ -111,12 +93,55 @@ class ChessArena:
         return False
 
     def checkMove(self, x1, y1, x2, y2):
-        pass
-
-    def getAIMove(self):
-        pass
+        flag=True
+        for i in self.UnitList:
+            if i.x==x1 and i.y==y1:
+                if i.UnitID=='K' and abs(x1-x2)==2:
+                    i.x=x2
+                    if self.isAttacked(i.x,i.y,i.owner):
+                        flag=False
+                    i.x=(x1+x2)//2
+                    if self.isAttacked(i.x,i.y,i.owner):
+                        flag=False
+                    i.x=x1
+                    if self.isAttacked(i.x,i.y,i.owner):
+                        flag=False
+                else:
+                    UnitList_backup=[]
+                    removedUnitID=-1
+                    for j in self.UnitList:
+                        if j.x==x2 and j.y==y2:
+                            removedUnitID=self.UnitList.index(j)
+                            UnitList_backup=copy.deepcopy(self.UnitList)
+                            break
+                    if removedUnitID>-1:
+                        del self.UnitList[removedUnitID]
+                    i.x=x2
+                    i.y=y2
+                    for j in self.UnitList:
+                        if j.UnitID=='K' and j.owner==i.owner:
+                            if self.isAttacked(j.x,j.y,j.owner):
+                                flag=False
+                                break
+                    if UnitList_backup:
+                        self.UnitList.clear()
+                        self.UnitList=copy.deepcopy(UnitList_backup)
+                    else:
+                        i.x=x1
+                        i.y=y1
+                break
+        return flag
 
     def getTotalMove(self, player):
+        totalMove=[]
+        for i in range(len(self.UnitList)):
+            if self.UnitList[i].owner==player:
+                for j in self.UnitList[i].getMove(self.getGridInfo()):
+                    if self.checkMove(self.UnitList[i].x,self.UnitList[i].y,j[0],j[1]):
+                        totalMove.append([[self.UnitList[i].x,self.UnitList[i].y],j])
+        return totalMove
+
+    def getAIMove(self):
         pass
 
     def alphabetaSearch(self, player):
@@ -368,10 +393,14 @@ def ArenaTest():
     game1.printGrid()
     game1.moveUnit(5,0,5,4)
     game1.moveUnit(6,0,6,4)
+    game1.moveUnit(3,7,5,1)
     game1.printGrid()
+    
     for i in game1.UnitList:
-        print(str(i.owner)+i.UnitID)
-        print(i.getMove(game1.getGridInfo()))
+        if i.owner==1:
+            print([i.x,i.y],i.getMove(game1.getGridInfo()))
+    print(game1.getTotalMove(1))
+    game1.printGrid()
 
 if '__main__' == __name__:
     ArenaTest()

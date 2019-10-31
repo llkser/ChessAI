@@ -62,6 +62,15 @@ class ChessArena:
         self.UnitList=copy.deepcopy(self.UnitList_backup)
         self.canBack=False
 
+    def isend(self):
+        k=0;
+        for i in self.UnitList:
+            if i.UnitID=='K':
+                k+=1
+        if k==2:
+            return 0;
+        return 1;
+
     def getGridInfo(self):
         Grid=[[],[],[],[],[],[],[],[]]
         for i in range(8):
@@ -145,6 +154,9 @@ class ChessArena:
         pass
 
     def alphabetaSearch(self, player):
+        pass
+
+    def gridEvaluate(self):
         pass
 
 class Unit:

@@ -62,14 +62,10 @@ class ChessArena:
         self.UnitList=copy.deepcopy(self.UnitList_backup)
         self.canBack=False
 
-    def isend(self):
-        k=0;
-        for i in self.UnitList:
-            if i.UnitID=='K':
-                k+=1
-        if k==2:
-            return 0;
-        return 1;
+    def isend(self, player):
+        if self.getTotalMove(player):
+            return False
+        return True
 
     def getGridInfo(self):
         Grid=[[],[],[],[],[],[],[],[]]
